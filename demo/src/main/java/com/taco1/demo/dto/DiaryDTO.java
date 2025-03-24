@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 //일기 데이터 전송을 위한 DTO
+//test
 @Getter
 @Setter
 public class DiaryDTO {
