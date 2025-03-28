@@ -1,6 +1,14 @@
 server:
   5000
 
+#cloud:
+#  aws:
+#    region:
+#      static: ap-northeast-2
+#    credentials:
+#      access-key:
+#      secret-key:
+
 
 spring:
   servlet:
@@ -8,4 +16,8 @@ spring:
       max-file-size: 300MB
       max-request-size: 300MB
 
-
+#  datasource:
+#    url:
+#    username:
+#    password:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
