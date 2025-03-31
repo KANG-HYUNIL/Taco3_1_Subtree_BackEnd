@@ -14,7 +14,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: demo  # 모든 step은 demo 폴더 안에서 실행됨
+        working-directory: demo  # 모든 run 단계는 demo 폴더 내에서 수행됨
 
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          build-root-directory: demo  # gradle wrapper를 demo에서 찾도록 설정
+          build-root-directory: demo
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew  # 여기서 demo/gradlew로 접근하지 않음. working-directory가 이미 demo임
 
       - name: Build with Gradle Wrapper
         run: ./gradlew build
@@ -54,4 +57,4 @@ jobs:
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@v4
         with:
-          build-root-directory: demo  # demo 내에서 build.gradle 탐색
+          build-root-directory: demo
