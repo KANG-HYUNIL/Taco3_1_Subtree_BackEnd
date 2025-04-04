@@ -21,10 +21,14 @@ public class MainController {
 
     @PostMapping("/api/image")
     @ResponseBody
-    public ResponseEntity<?> test(@RequestPart("multipartFile") List<MultipartFile> files) {
+    public ResponseEntity<?> test(
+            @RequestPart("image") List<MultipartFile> files,
+            @RequestPart("metadata") List<String> metadataList) {
 
         try {
-            fileService.SendImageToModel(files); //이미지 파일들 처리 서비스 호출
+//            fileService.SendImageToModel(files); //이미지 파일들 처리 서비스 호출
+
+            fileService.SendImageToModel(files, metadataList);
 
             //모든 처리 작업 완료 후 데이터를 다시 응답에 돌려줘야 함, fixme
             return new ResponseEntity<>("test", HttpStatus.OK);
