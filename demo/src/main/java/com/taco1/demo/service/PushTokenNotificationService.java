@@ -10,6 +10,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -19,7 +22,7 @@ import java.util.List;
 public class PushTokenNotificationService {
 
     private final PushTokenRepository pushTokenRepository;
-    private final RestTemplate restTemplate;
+    private final WebClient webClient;
 
     //EXPO 서버 URL
     private final String EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
@@ -45,30 +48,26 @@ public class PushTokenNotificationService {
     }
 
     //특정 사용자에게 token을 통해 PUSH 알림 보내기 메소드
-    public void sendPushNotification(String token, String title, String body)
+    public Mono<String> sendPushNotification(String token, String title, String body)
     {
         //Message 생성
         ExpoPushMessage expoPushMessage = new ExpoPushMessage(token, title, body);
 
-        //HttpHeaders 생성 및 설정
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Accept", "application/json");
-
-        //요청 생성
-        HttpEntity<List<ExpoPushMessage>> request = new HttpEntity<>(List.of(expoPushMessage), headers);
-
         try
         {
-            //통신 발사
-            ResponseEntity<String> response = restTemplate.postForEntity(EXPO_PUSH_URL, request, String.class);
+            return webClient.post()
+                    .uri(EXPO_PUSH_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Accept", "application/json")
+                    .bodyValue(List.of(expoPushMessage))
+                    .retrieve()
+                    .onStatus(status -> !status.is2xxSuccessful(),
+                            clientResponse -> clientResponse.bodyToMono(String.class)
+                                    .flatMap(errorBody -> Mono.error(new RuntimeException(
+                                            "푸시 알림 전송 실패: 상태코드=" + clientResponse.statusCode() + ", 응답=" + errorBody))))
+                    .bodyToMono(String.class)
+                    .onErrorResume(e -> Mono.error(new RuntimeException("푸시 알림 전송 중 예외 발생: " + e.getMessage(), e)));
 
-            //상태코드 확인
-            if (!response.getStatusCode().is2xxSuccessful())
-            {
-                throw new RuntimeException("푸시 알림 전송 실패: 상태코드=" + response.getStatusCode()
-                        + ", 응답=" + response.getBody());
-            }
         }
         //예외 처리
         catch (Exception e)
@@ -77,21 +76,20 @@ public class PushTokenNotificationService {
         }
     }
 
-    //모든 사용자에게 PUSH 메소드 실행
-    public void sendToAllUsers() {
-
-        //가지고 있는 모든 token 획득
+    // 모든 사용자에게 PUSH 메소드 실행 (논블로킹)
+    public Mono<Void> sendToAllUsers() {
+        // 가지고 있는 모든 token 획득
         List<PushTokenEntity> tokens = pushTokenRepository.findAll();
 
-        //모든 token에게 하나씩 발송
-        for (PushTokenEntity token : tokens) {
-            sendPushNotification(token.getToken(), TITLE, MESSAGE);
-        }
+        // 모든 token에게 병렬로 발송
+        return Flux.fromIterable(tokens)
+                .flatMap(tokenEntity -> sendPushNotification(tokenEntity.getToken(), TITLE, MESSAGE))
+                .then();
     }
 
     @Scheduled(cron = "0 0 21 * * *")  // 매일 오후 9?시에 실행
     public void schedulePushToAll() {
-        sendToAllUsers();
+        sendToAllUsers().block();
     }
 
 }
