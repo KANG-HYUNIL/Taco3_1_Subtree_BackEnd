@@ -42,7 +42,7 @@ public class FileService {
 
 
     // 이미지와 메타데이터를 매핑하여 처리하는 메서드
-    public Mono<Map<String, String>> SendImageToModel(
+    public Mono<String> SendImageToModel(
             List<MultipartFile> files,
             List<String> metadataList) {
 
@@ -73,7 +73,18 @@ public class FileService {
                                         return metadataJson;
                                     }));
                 })
-                .then(Mono.just(resultMap)); // 모든 처리가 완료되면 resultMap 반환
+                .then(Mono.defer(() -> {
+                    // 모든 결과를 하나의 긴 문자열로 합치기
+                    StringBuilder combinedResult = new StringBuilder();
+                    for (Map.Entry<String, String> entry : resultMap.entrySet()) {
+                        combinedResult.append(entry.getValue()).append("\n"); // 모델 출력
+                        combinedResult.append(entry.getKey()).append("\n");  // 메타데이터
+                    }
+
+                    // OpenAI API를 통해 결과 처리
+                    String openAIResponse = openAIAPIService.generateChatResponse(combinedResult.toString());
+                    return Mono.just(openAIResponse);
+                }));
     }
 
     // 이미지를 API로 전송하고 작업 ID 반환
@@ -126,7 +137,8 @@ public class FileService {
                         .zipWith(Flux.range(1, (int)MaxAttempt)) // 시도 횟수 추적 (1부터 MaxAttempt까지)
                         .flatMap(tuple -> {
                             long attempt = tuple.getT2(); // 현재 시도 횟수
-                            if (attempt >= MaxAttempt) { // 최대 시도 횟수 초과 검사
+                            if (attempt >= MaxAttempt)
+                            { // 최대 시도 횟수 초과 검사
                                 return Mono.error(new RuntimeException("최대 시도 횟수 초과"));
                             }
                             return Mono.delay(Duration.ofMillis(delayTime)); // 지정된 시간만큼 대기 후 재시도

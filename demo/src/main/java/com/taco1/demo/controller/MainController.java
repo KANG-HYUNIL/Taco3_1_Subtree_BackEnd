@@ -1,5 +1,6 @@
 package com.taco1.demo.controller;
 
+import com.taco1.demo.dto.DiaryDTO;
 import com.taco1.demo.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -19,23 +21,26 @@ public class MainController {
 
     private final FileService fileService;
 
+    //Content를 받아 ResponseEntity<DiaryDTO>로 변환하는 메서드
+    private static ResponseEntity<DiaryDTO> apply(String content) {
+        DiaryDTO diaryDTO = new DiaryDTO();
+        diaryDTO.setContent(content);
+        return ResponseEntity.ok(diaryDTO);
+    }
+
     @PostMapping("/api/image")
     @ResponseBody
-    public ResponseEntity<?> test(
+    // 반환값이 ResponseEntity<DiaryDTO>로 되어 있어서 , Spring WebFlux는 비동기를 대기함
+    public Mono<ResponseEntity<DiaryDTO>> test(
             @RequestPart("image") List<MultipartFile> files,
             @RequestPart("metadata") List<String> metadataList) {
 
-        try {
-//            fileService.SendImageToModel(files); //이미지 파일들 처리 서비스 호출
-
-            fileService.SendImageToModel(files, metadataList);
-
-            //모든 처리 작업 완료 후 데이터를 다시 응답에 돌려줘야 함, fixme
-            return new ResponseEntity<>("test", HttpStatus.OK);
-        } catch (Exception e)
-        {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        return fileService.SendImageToModel(files, metadataList) // Service 단 비동기 시작
+                .map(MainController::apply) // 작업 완료 대기 후 DiaryDTO 로 변환
+                .onErrorResume(e -> Mono.just( // 에러 발생 시 처리
+                        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(new DiaryDTO())
+                ));
 
 
     }
