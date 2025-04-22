@@ -1,5 +1,6 @@
 package com.taco1.demo.service;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RedisService<T> {
 
     //RedisTemplate 객체 생성 및 관리
@@ -17,6 +19,10 @@ public class RedisService<T> {
     //Redis에 값 저장
     public void setValues(String key, T value, Duration duration) {
         redisTemplate.opsForValue().set(key, value, duration);
+    }
+
+    public void setValues(String key, T value) {
+        redisTemplate.opsForValue().set(key, value);
     }
 
     //Redis에서 값 획득

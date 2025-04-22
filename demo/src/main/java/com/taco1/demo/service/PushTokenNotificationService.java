@@ -1,11 +1,11 @@
 package com.taco1.demo.service;
 
-import com.taco1.demo.converter.PushTokenConverter;
+
 import com.taco1.demo.dto.PushTokenDTO;
 import com.taco1.demo.entity.PushTokenEntity;
 import com.taco1.demo.message.ExpoPushMessage;
-import com.taco1.demo.repository.PushTokenRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -15,34 +15,34 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Set;
 
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PushTokenNotificationService {
 
-    private final PushTokenRepository pushTokenRepository;
+    private final RedisExpoTokenService redisExpoTokenService;
     private final WebClient webClient;
 
     //EXPO 서버 URL
     private final String EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 
     //알림에 실어 보낼 TITLE 및 MESSAGE
-    private final String TITLE = "";
-    private final String MESSAGE = "";
+    private final String TITLE = "title";
+    private final String MESSAGE = "message";
+
+    private final String DIARY_TITLE = "Diary Title";
+    private final String DIARY_MESSAGE = "Diary Message";
 
 
-    // Save the token to the database
-    public void saveToken(PushTokenDTO pushTokenDTO)
-    {
-
+    // Save the token to Redis
+    public void saveToken(PushTokenDTO pushTokenDTO) {
         try {
-            // Expo Token 저장
-            PushTokenEntity pushTokenEntity = PushTokenConverter.toEntity(pushTokenDTO);
-            pushTokenRepository.save(pushTokenEntity);
-
+            // Expo Token을 Redis에 저장
+            redisExpoTokenService.addToken(pushTokenDTO.getToken());
         } catch (Exception e) {
-            // Handle exception
             throw new RuntimeException("Error saving token", e);
         }
     }
@@ -78,12 +78,12 @@ public class PushTokenNotificationService {
 
     // 모든 사용자에게 PUSH 메소드 실행 (논블로킹)
     public Mono<Void> sendToAllUsers() {
-        // 가지고 있는 모든 token 획득
-        List<PushTokenEntity> tokens = pushTokenRepository.findAll();
+        // Redis에서 모든 토큰 가져오기
+        Set<String> tokens = redisExpoTokenService.getAllTokens();
 
         // 모든 token에게 병렬로 발송
         return Flux.fromIterable(tokens)
-                .flatMap(tokenEntity -> sendPushNotification(tokenEntity.getToken(), TITLE, MESSAGE))
+                .flatMap(token -> sendPushNotification(token, TITLE, MESSAGE))
                 .then();
     }
 

@@ -18,7 +18,7 @@ public class OpenAIProviderImpl implements OpenAIProvider{
 
     // System 프롬프트
     private final String systemMessage =
-            "";
+            "Hi, I am a helpful assistant. ";
 
     // Temp
     private final Double temperature = 0.7;

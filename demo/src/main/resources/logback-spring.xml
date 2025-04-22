@@ -15,9 +15,10 @@
         </rollingPolicy>
     </appender>
 
-    <!-- CloudWatch 설정 -->
+<!--     CloudWatch 설정 -->
     <appender name="CLOUDWATCH" class="ca.pjer.logback.AwsLogsAppender">
-        <logGroupName>taco1-app-logs</logGroupName>
+
+        <logGroupName>taco3-1-app-logs</logGroupName>
         <logStreamName>app-${HOSTNAME}-${CONTEXT_NAME}</logStreamName>
         <logRegion>ap-northeast-2</logRegion>
         <maxBatchLogEvents>50</maxBatchLogEvents>

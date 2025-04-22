@@ -12,11 +12,11 @@ blip3-deploy:
 
 openai:
     api:
-        key: ${OPENAI_API_KEY}
-        base-url: https://api.openai.com/v1/chat/completions
-        model: gpt-4o
-        max-tokens: 5000
-        temperature: 0.7
+      key: ${OPENAI_API_KEY}
+      base-url: https://api.openai.com/v1/chat/completions
+      model: gpt-4o
+      max-tokens: 5000
+      temperature: 0.7
 
 logging:
   level:
@@ -44,26 +44,27 @@ spring:
   config:
     activate:
       on-profile: local
-  datasource:
-    url: jdbc:h2:mem:localdb;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: sa
+#  datasource:
+#    url: jdbc:mysql://your-rds-endpoint:3306/your-db-name
+#    username: admin
+#    password: tacobackend
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: update  # 주의: 운영 환경에서는 validate 권장
+#    show-sql: false
+#    database-platform: org.hibernate.dialect.MySQLDialect
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.MySQLDialect
 
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-    database-platform: org.hibernate.dialect.H2Dialect
 
-  h2:
-    console:
-      enabled: true
 
   redis:
-    host: ${redis host}
+    host: taco-3-team1-diary-redis-7f0usp.serverless.apn2.cache.amazonaws.com
     port: 6379 #6379
-    ssl: false
+    ssl: true
     password :
 
 #  datasource:

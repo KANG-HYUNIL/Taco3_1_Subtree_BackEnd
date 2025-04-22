@@ -28,7 +28,7 @@ public class FileService {
     private final WebClient webClient;
 
     //bplip3 API URL
-    @Value("${blip3-deploy.api}")
+
     private String blip3ApiUrl;
 
     //system prompt
@@ -60,18 +60,13 @@ public class FileService {
                     MultipartFile file = files.get(i);
                     String metadataJson = metadataList.get(i);
 
-                    // 메타데이터 JSON을 DTO로 변환
-                    return Mono.fromCallable(() -> {
-                                ObjectMapper objectMapper = new ObjectMapper();
-                                return objectMapper.readValue(metadataJson, MetadataDTO.class);
-                            })
-                            .flatMap(metadata -> sendImageToBlip3Api(file)
-                                    .flatMap(jobId -> pollForResult(jobId))
-                                    .map(result -> {
-                                        // 응답을 metadataJson과 매핑하여 저장
-                                        resultMap.put(metadataJson, result);
-                                        return metadataJson;
-                                    }));
+
+                    return sendImageToBlip3Api(file)
+                            .flatMap(jobId -> pollForResult(jobId))
+                            .map(result -> {
+                                resultMap.put(metadataJson, result);
+                                return metadataJson;
+                            });
                 })
                 .then(Mono.defer(() -> {
                     // 모든 결과를 하나의 긴 문자열로 합치기
