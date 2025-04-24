@@ -24,8 +24,11 @@ public class OpenAIConfig {
 
     @Bean
     public OpenAIClient openAiApi() {
+        String cleanApiKey = apiKey != null ?
+                apiKey.trim().replace("\n", "").replace("\r", "") :
+                "";
         return OpenAIOkHttpClient.builder()
-                .apiKey(apiKey)
+                .apiKey(cleanApiKey)
                 .build();
     }
 }

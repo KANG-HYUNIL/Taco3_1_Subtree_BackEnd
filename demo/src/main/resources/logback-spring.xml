@@ -16,29 +16,29 @@
     </appender>
 
 <!--     CloudWatch 설정 -->
-    <appender name="CLOUDWATCH" class="ca.pjer.logback.AwsLogsAppender">
+<!--    <appender name="CLOUDWATCH" class="ca.pjer.logback.AwsLogsAppender">-->
 
-        <logGroupName>taco3-1-app-logs</logGroupName>
-        <logStreamName>app-${HOSTNAME}-${CONTEXT_NAME}</logStreamName>
-        <logRegion>ap-northeast-2</logRegion>
-        <maxBatchLogEvents>50</maxBatchLogEvents>
-        <maxFlushTimeMillis>30000</maxFlushTimeMillis>
-        <maxBlockTimeMillis>5000</maxBlockTimeMillis>
-        <retentionTimeDays>0</retentionTimeDays>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <includeMdc>true</includeMdc>
-            <includeContext>true</includeContext>
-            <timestampPattern>yyyy-MM-dd'T'HH:mm:ss.SSS'Z'</timestampPattern>
-            <fieldNames>
-                <timestamp>timestamp</timestamp>
-                <level>level</level>
-                <logger>logger</logger>
-                <thread>thread</thread>
-                <message>message</message>
-                <stackTrace>exception</stackTrace>
-            </fieldNames>
-        </encoder>
-    </appender>
+<!--        <logGroupName>taco3-1-app-logs</logGroupName>-->
+<!--        <logStreamName>app-${HOSTNAME}-${CONTEXT_NAME}</logStreamName>-->
+<!--        <logRegion>ap-northeast-2</logRegion>-->
+<!--        <maxBatchLogEvents>50</maxBatchLogEvents>-->
+<!--        <maxFlushTimeMillis>30000</maxFlushTimeMillis>-->
+<!--        <maxBlockTimeMillis>5000</maxBlockTimeMillis>-->
+<!--        <retentionTimeDays>0</retentionTimeDays>-->
+<!--        <encoder class="net.logstash.logback.encoder.LogstashEncoder">-->
+<!--            <includeMdc>true</includeMdc>-->
+<!--            <includeContext>true</includeContext>-->
+<!--            <timestampPattern>yyyy-MM-dd'T'HH:mm:ss.SSS'Z'</timestampPattern>-->
+<!--            <fieldNames>-->
+<!--                <timestamp>timestamp</timestamp>-->
+<!--                <level>level</level>-->
+<!--                <logger>logger</logger>-->
+<!--                <thread>thread</thread>-->
+<!--                <message>message</message>-->
+<!--                <stackTrace>exception</stackTrace>-->
+<!--            </fieldNames>-->
+<!--        </encoder>-->
+<!--    </appender>-->
 
     <!-- 서비스별 로그 레벨 설정 -->
     <logger name="com.taco1.demo.service.FileService" level="DEBUG" />
@@ -52,6 +52,6 @@
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
-        <appender-ref ref="CLOUDWATCH" />
+<!--        <appender-ref ref="CLOUDWATCH" />-->
     </root>
 </configuration>

@@ -1,11 +1,18 @@
 package com.taco1.demo.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taco1.demo.dto.DiaryDTO;
+import com.taco1.demo.dto.MetadataDTO;
 import com.taco1.demo.dto.MetadataRequestDTO;
+import com.taco1.demo.service.Blip3TaskProcessingService;
 import com.taco1.demo.service.FileService;
 import com.taco1.demo.service.OpenAIAPIService;
 import com.taco1.demo.service.RedisService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +24,14 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class MainController {
 
     private final FileService fileService;
     private final RedisService<String> redisService;
     private final OpenAIAPIService openAIAPIService;
+    private final Blip3TaskProcessingService blip3TaskProcessingService;
+    private final TaskExecutor taskExecutor;
 
     //Content를 받아 ResponseEntity<DiaryDTO>로 변환하는 메서드
     private static ResponseEntity<DiaryDTO> apply(String content) {
@@ -76,11 +86,31 @@ public class MainController {
      * 메타데이터와 작업 정보를 받는 API 엔드포인트
      */
     @PostMapping("/api/metadata")
-    public ResponseEntity<String> receiveMetadata(@RequestBody MetadataRequestDTO requestDTO) {
-        // 여기서 requestDTO에는 메타데이터 배열, task_id, token이 포함됨
-        // 구현은 추후 작성 예정
+    public ResponseEntity<String> receiveMetadata(@RequestParam("metadata") String metadataJson) {
+        try {
+            // JSON 문자열을 DTO로 변환
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(metadataJson);
 
-        return ResponseEntity.ok("메타데이터 수신 완료");
+            // 프론트엔드 형식을 백엔드 DTO에 매핑
+            MetadataRequestDTO requestDTO = new MetadataRequestDTO();
+            requestDTO.setMetadataDTOList(objectMapper.convertValue(rootNode.path("images"),
+                    new TypeReference<List<MetadataDTO>>() {}));
+            requestDTO.setTask_id(rootNode.path("task_id").asText());
+            requestDTO.setToken(rootNode.path("token").asText());
+
+            // 비동기 처리
+            // 즉시 응답 반환
+            taskExecutor.execute(() -> {
+                blip3TaskProcessingService.processMetadataRequest(requestDTO)
+                        .subscribe(/* 콜백 */);
+            });
+
+            return ResponseEntity.ok("메타데이터 수신 완료");
+        } catch (Exception e) {
+            log.error("메타데이터 파싱 오류", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("메타데이터 형식 오류");
+        }
     }
 
     /**

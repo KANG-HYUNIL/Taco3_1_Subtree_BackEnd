@@ -1,14 +1,33 @@
+server:
+  port: 5000
+
+
 spring:
+#  config:
+#    import : "optional:aws-parameterstore:/config/taco_3_team1_be/deploy/"
   profiles:
-    active: local
+    active: prod
   servlet:
     multipart:
       max-file-size: 300MB
       max-request-size: 300MB
 
 
-blip3-deploy:
-  api : ${api}
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ${AWS_REGION}
+    stack:
+      auto: false
+#    parameter-store:
+#      enabled: true
+#      prefix : /config/taco_3_team1_be/deploy
+#      name : taco_3_team1_be/deploy
+
 
 openai:
     api:
@@ -28,15 +47,8 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
-cloud:
-  aws:
-    credentials:
-      access-key: ${AWS_ACCESS_KEY}
-      secret-key: ${AWS_SECRET_KEY}
-    region:
-      static: ap-northeast-2
-    stack:
-      auto: false
+
+
 
 ---
 
@@ -62,9 +74,10 @@ spring:
 
 
   redis:
-    host: taco-3-team1-diary-redis-7f0usp.serverless.apn2.cache.amazonaws.com
+    #host: taco-3-team1-diary-redis-7f0usp.serverless.apn2.cache.amazonaws.com
+    host : localhost
     port: 6379 #6379
-    ssl: true
+    ssl: false
     password :
 
 #  datasource:
@@ -80,6 +93,20 @@ spring:
 #    database-platform: org.hibernate.dialect.MySQL8Dialect
 
 ---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+  redis:
+    host: taco-3-team1-diary-redis-7f0usp.serverless.apn2.cache.amazonaws.com
+    port: 6379
+    ssl: true
+    password:
+
+---
+
+
 
 spring:
   config:
