@@ -99,9 +99,9 @@ spring:
     activate:
       on-profile: prod
   redis:
-    host: taco-3-team1-diary-redis-7f0usp.serverless.apn2.cache.amazonaws.com
+    host: taco-3-team1-be-rediscluster.7f0usp.ng.0001.apn2.cache.amazonaws.com
     port: 6379
-    ssl: true
+    ssl: false
     password:
 
 ---

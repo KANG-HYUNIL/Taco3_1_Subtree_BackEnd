@@ -32,10 +32,8 @@ public class RedisConfig {
         redisStandaloneConfiguration.setPort(port);
         //redisStandaloneConfiguration.setPassword(password);
 
-        // SSL 설정 적용
-        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                .useSsl()
-                .disablePeerVerification()  // 필요에 따라 설정 (보안상 실제 운영 환경에서는 권장되지 않음)
+        // SSL 설정 미적용
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder() // 필요에 따라 설정 (보안상 실제 운영 환경에서는 권장되지 않음)
                 .build();
 
         try {
