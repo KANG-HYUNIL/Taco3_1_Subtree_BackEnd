@@ -36,4 +36,21 @@ public class OpenAIAPIService {
     }
 
 
+    // 새로운 메소드들
+    public String generateChatResponse(String prompt, String promptType, String customPrompt) {
+        return openAIProvider.generateResponse(prompt, promptType, customPrompt);
+    }
+
+    public String generateChatResponseAllInSystem(String prompt, String promptType, String customPrompt) {
+        return openAIProvider.generateResponseAllInSystem(prompt, promptType, customPrompt);
+    }
+
+    public String generateChatResponseMixed(String prompt, String promptType, String customPrompt) {
+        return openAIProvider.generateResponseMixed(prompt, promptType, customPrompt);
+    }
+
+    public String generateChatResponseAllInUser(String prompt, String promptType, String customPrompt) {
+        return openAIProvider.generateResponseAllInUser(prompt, promptType, customPrompt);
+    }
+
 }
