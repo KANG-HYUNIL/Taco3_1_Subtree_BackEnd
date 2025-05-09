@@ -4,7 +4,6 @@ import com.openai.client.OpenAIClient;
 import com.openai.models.ChatModel;
 import com.openai.models.chat.completions.ChatCompletion;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
-import com.taco1.demo.service.PromptTemplateProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -20,10 +19,23 @@ public class OpenAIProviderImpl implements OpenAIProvider{
 
     // System 프롬프트
     private final String systemMessage =
-            "Hi, I am a helpful assistant. Write a diary with these descriptions. " +
-                    "Please write a diary entry based on the following information. " +
-                    "You can use the information to create a diary entry. " +
-                    "Please write in a friendly and engaging manner.";
+    "Hi, I am a helpful assistant. Write a diary with these descriptions." +
+    "Please write a diary entry based on the following information." +
+    "You can use the information to create a diary entry." +
+    "After writing the diary, please add a 3-line summary of the diary entry." +
+    "Each line of the summary MUST be separated by a newline character. " +
+    "Format your response as follows: " +
+
+            "[DIARY]\n" +
+            "(Your diary content here)\n" +
+            "[/DIARY]\n\n" +
+
+            "[SUMMARY]\n" +
+            "Line 1 of your summary\n" +
+            "Line 2 of your summary\n" +
+            "Line 3 of your summary\n" +
+            "[/SUMMARY]";
+
 
     // Temp
     private final Double temperature = 0.7;

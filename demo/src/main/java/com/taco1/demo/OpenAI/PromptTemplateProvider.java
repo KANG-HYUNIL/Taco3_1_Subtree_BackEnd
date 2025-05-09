@@ -1,4 +1,4 @@
-package com.taco1.demo.service;
+package com.taco1.demo.OpenAI;
 
 import org.springframework.stereotype.Component;
 import java.util.HashMap;

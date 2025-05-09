@@ -19,5 +19,5 @@ public class DiaryDTO {
 
     private List<String> imageUris;
 
-
+    private String summary;
 }

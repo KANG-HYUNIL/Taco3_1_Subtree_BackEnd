@@ -3,6 +3,7 @@ package com.taco1.demo.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.taco1.demo.OpenAI.OpenAIResponseParser;
 import com.taco1.demo.dto.DiaryDTO;
 import com.taco1.demo.dto.MetadataDTO;
 import com.taco1.demo.dto.MetadataRequestDTO;
@@ -32,6 +33,7 @@ public class MainController {
     private final OpenAIAPIService openAIAPIService;
     private final Blip3TaskProcessingService blip3TaskProcessingService;
     private final TaskExecutor taskExecutor;
+    private final OpenAIResponseParser openAIResponseParser;
 
     //Content를 받아 ResponseEntity<DiaryDTO>로 변환하는 메서드
     private static ResponseEntity<DiaryDTO> apply(String content) {
@@ -68,7 +70,7 @@ public class MainController {
                     if (redisService.checkExistsValue(taskId)) {
                         String value = redisService.getValues(taskId);
                         DiaryDTO diaryDTO = new DiaryDTO();
-                        diaryDTO.setContent(value);
+                        openAIResponseParser.parseGptResponse(value, diaryDTO);
 
                         return ResponseEntity.ok(diaryDTO);
                     } else {
