@@ -188,6 +188,8 @@ public class Blip3TaskProcessingService {
         String taskId = requestDTO.getTask_id();
         String expoToken = requestDTO.getToken();
         List<MetadataDTO> metadataList = requestDTO.getMetadataDTOList(); // 필드 이름 주의
+        String promptType = requestDTO.getPromptType();
+        String customPrompt = requestDTO.getCustomPrompt();
 
         log.info("작업 ID: {}, 메타데이터 처리 시작", taskId);
 
@@ -209,7 +211,8 @@ public class Blip3TaskProcessingService {
 
                                 // 6. OpenAI API 호출 및 결과 처리
                                 try {
-                                    String aiResponse = openAIAPIService.generateChatResponse(prompt);
+                                    //String aiResponse = openAIAPIService.generateChatResponse(prompt);
+                                    String aiResponse = openAIAPIService.generateChatResponseAllInSystem(prompt, promptType, customPrompt);
                                     log.info("OpenAI 응답 생성 완료");
 
                                     // 7. Redis에 결과 저장 (원본 taskId를 키로 사용)
