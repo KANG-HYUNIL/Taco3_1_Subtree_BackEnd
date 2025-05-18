@@ -100,6 +100,7 @@ public class MainController {
                     new TypeReference<List<MetadataDTO>>() {}));
             requestDTO.setTask_id(rootNode.path("task_id").asText());
             requestDTO.setToken(rootNode.path("token").asText());
+            requestDTO.setPromptType(rootNode.path("promptType").asText());
 
             // 비동기 처리
             // 즉시 응답 반환
